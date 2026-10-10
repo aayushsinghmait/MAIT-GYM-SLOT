@@ -96,6 +96,7 @@ function handleRouting() {
   // Show active view
   if (hash === '/login') {
     document.body.classList.add('auth-page');
+    document.body.classList.remove('sessions-page');
     document.getElementById('view-auth').style.display = 'flex';
     if (bgVideo && bgVideo.paused) {
       bgVideo.play().catch(() => {});
@@ -106,13 +107,16 @@ function handleRouting() {
       bgVideo.pause();
     }
     if (hash === '/sessions') {
+      document.body.classList.add('sessions-page');
       document.getElementById('view-sessions').style.display = 'flex';
       loadSessions();
       startSessionsPolling();
     } else if (hash === '/my-bookings') {
+      document.body.classList.remove('sessions-page');
       document.getElementById('view-my-bookings').style.display = 'flex';
       loadMyBookings();
     } else if (hash === '/admin') {
+      document.body.classList.remove('sessions-page');
       document.getElementById('view-admin').style.display = 'flex';
       initAdminPage();
     } else {

@@ -1731,7 +1731,8 @@ body.auth-page .main-content {
   }
 
   .auth-split-wrapper {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     height: auto;
     max-height: none;
     gap: 1.25rem;
@@ -1739,7 +1740,14 @@ body.auth-page .main-content {
     border-radius: 18px;
   }
 
+  .auth-card {
+    order: 1;
+    height: auto;
+    padding: 1.25rem 1rem;
+  }
+
   .auth-video-container {
+    order: 2;
     height: 250px;
     min-height: 220px;
     border-radius: 14px;
@@ -1753,11 +1761,6 @@ body.auth-page .main-content {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
-  }
-
-  .auth-card {
-    height: auto;
-    padding: 1.25rem 1rem;
   }
 }
 

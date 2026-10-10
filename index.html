@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gym Slot Booking System - Book 1-hour gym sessions with waitlists and check-in codes. Pure HTML, CSS, JavaScript.">
+  <title>MAIT-Gym-Slot- MAIT Gym Slot Booking System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar" id="main-navbar" style="display: none;">
+    <div class="nav-container">
+      <a href="#/sessions" class="brand-link">
+        <span class="brand-icon">🏋️</span>
+        <span class="brand-name">MAIT-Gym-Slot</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#/sessions" class="nav-link" id="nav-link-sessions">Sessions</a>
+        <a href="#/my-bookings" class="nav-link" id="nav-link-bookings">My Bookings</a>
+        <a href="#/admin" class="nav-link admin-only" id="nav-link-admin" style="display: none;">Admin Panel</a>
+      </nav>
+
+      <div class="nav-user">
+        <span class="user-name" id="nav-user-name"></span>
+        <span class="role-badge" id="nav-user-role"></span>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-logout" aria-label="Log Out">
+          Log Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Global Toast / Alert Banner -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- ================= PAGE 1: AUTH (LOGIN & REGISTER) ================= -->
+    <section class="page-view" id="view-auth">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">🏋️ MAIT-Gym-Slot</div>
+          <h1 id="auth-title">Welcome Back</h1>
+          <p class="auth-subtitle" id="auth-subtitle">Log in to book your 1-hour workout slots</p>
+        </div>
+
+        <!-- Auth Tabs Toggle -->
+        <div class="auth-tabs" role="tablist">
+          <button type="button" class="auth-tab active" id="tab-login" role="tab" aria-selected="true">
+            Log In
+          </button>
+          <button type="button" class="auth-tab" id="tab-register" role="tab" aria-selected="false">
+            Register
+          </button>
+        </div>
+
+        <!-- Auth Error Banner -->
+        <div class="alert alert-error" id="auth-error-banner" style="display: none;" role="alert">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text" id="auth-error-text"></span>
+        </div>
+
+        <!-- Auth Form -->
+        <form id="form-auth" class="auth-form" novalidate>
+          <!-- Name field (register only) -->
+          <div class="form-group" id="group-name" style="display: none;">
+            <label for="input-name">Full Name</label>
+            <input type="text" id="input-name" class="form-input" placeholder="e.g. Aayush Singh" autocomplete="name">
+            <span class="field-error" id="error-name"></span>
+          </div>
+
+          <!-- Email field -->
+          <div class="form-group">
+            <label for="input-email">Email Address</label>
+            <input type="email" id="input-email" class="form-input" placeholder="e.g. member@gmail.com" autocomplete="email" required>
+            <span class="field-error" id="error-email"></span>
+          </div>
+
+          <!-- Password field -->
+          <div class="form-group">
+            <label for="input-password">Password</label>
+            <input type="password" id="input-password" class="form-input" placeholder="At least 6 characters" autocomplete="current-password" required>
+            <span class="field-error" id="error-password"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btn-auth-submit">
+            Log In
+          </button>
+        </form>
+
+        <!-- Quick-Fill Test Accounts -->
+        <div class="demo-box">
+          <p class="demo-title">Quick Test Accounts (Click to autofill):</p>
+          <div class="demo-buttons">
+            <button type="button" class="btn btn-outline btn-xs" id="btn-demo-admin">
+              🔑 Staff Admin
+            </button>
+            <button type="button" class="btn btn-outline btn-xs" id="btn-demo-member1">
+              👤 Member (Khushi)
+            </button>
+            <button type="button" class="btn btn-outline btn-xs" id="btn-demo-member2">
+              ⏳ Waitlisted (Aditya)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 2: SESSIONS LIST ================= -->
+    <section class="page-view" id="view-sessions" style="display: none;">
+      <div class="page-header">
+        <div>
+          <h1>Gym Sessions</h1>
+          <p class="page-subtitle">Each session is 1 hour long. Hard limit of 20 members per session.</p>
+        </div>
+        <div class="live-pill" title="Seats remaining update live every 5 seconds">
+          <span class="live-dot"></span>
+          <span>Live Updates Active</span>
+        </div>
+      </div>
+
+      <!-- Date Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="filter-date" class="filter-label">Filter by Date:</label>
+          <input type="date" id="filter-date" class="form-input filter-date-input">
+        </div>
+        <div class="quick-dates">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-date-today">Today</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-date-tomorrow">Tomorrow</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-date-dayafter">Day After</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-date-clear" style="display: none;">Clear Filter</button>
+        </div>
+      </div>
+
+      <!-- State Containers -->
+      <div id="sessions-loading" class="center-box" style="display: none;">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading gym sessions...</p>
+      </div>
+
+      <div id="sessions-error" class="alert alert-error" style="display: none;" role="alert">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text" id="sessions-error-text"></span>
+        <button type="button" class="btn btn-sm btn-outline" id="btn-sessions-retry" style="margin-left: auto;">Retry</button>
+      </div>
+
+      <div id="sessions-empty" class="empty-box" style="display: none;">
+        <div class="empty-icon">📅</div>
+        <h3>No Sessions Found</h3>
+        <p id="sessions-empty-text">No sessions are currently scheduled for this date.</p>
+      </div>
+
+      <!-- Sessions Grid -->
+      <div class="sessions-grid" id="sessions-grid"></div>
+    </section>
+
+    <!-- ================= PAGE 3: MY BOOKINGS ================= -->
+    <section class="page-view" id="view-my-bookings" style="display: none;">
+      <div class="page-header">
+        <div>
+          <h1>My Bookings & Codes</h1>
+          <p class="page-subtitle">Show your 6-character check-in code to gym staff when you arrive.</p>
+        </div>
+      </div>
+
+      <!-- Bookings Loading / Error -->
+      <div id="bookings-loading" class="center-box" style="display: none;">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading your bookings...</p>
+      </div>
+
+      <div id="bookings-error" class="alert alert-error" style="display: none;" role="alert">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text" id="bookings-error-text"></span>
+      </div>
+
+      <!-- Confirmed Bookings Section -->
+      <div class="section-block">
+        <h2 class="section-heading">Confirmed Bookings</h2>
+        <div id="bookings-empty" class="empty-box" style="display: none;">
+          <div class="empty-icon">🎟️</div>
+          <h3>No Bookings Yet</h3>
+          <p>You haven't booked any workout sessions yet.</p>
+          <a href="#/sessions" class="btn btn-primary" style="margin-top: 1rem;">Browse Sessions</a>
+        </div>
+        <div class="bookings-list" id="bookings-list"></div>
+      </div>
+
+      <!-- Waitlist Section -->
+      <div class="section-block" style="margin-top: 2.5rem;">
+        <h2 class="section-heading">My Waitlists</h2>
+        <p class="section-subtext" id="waitlist-empty" style="display: none;">You are not currently on any session waitlists.</p>
+        <div class="waitlist-grid" id="waitlist-grid"></div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 4: ADMIN PAGE ================= -->
+    <section class="page-view" id="view-admin" style="display: none;">
+      <div class="page-header">
+        <div>
+          <h1>Staff Admin Desk</h1>
+          <p class="page-subtitle">Verify check-in codes at the door, create sessions, and view member bookings.</p>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <!-- 1. Mark Who Turned Up (Check-In) -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2>1. Mark Who Turned Up (Check-In)</h2>
+            <p class="card-subtext">Type the member's 6-character code. Codes work only once during the session hour.</p>
+          </div>
+
+          <form id="form-checkin" class="admin-form" novalidate>
+            <div class="form-group">
+              <label for="input-checkin-code">Check-In Code</label>
+              <div class="code-entry-row">
+                <input type="text" id="input-checkin-code" class="form-input code-input" placeholder="e.g. 7XKP2Q" maxlength="6" required>
+                <button type="submit" class="btn btn-primary" id="btn-checkin-submit">Check In</button>
+              </div>
+              <span class="field-error" id="error-checkin-code"></span>
+            </div>
+          </form>
+
+          <div class="alert alert-error" id="checkin-error-alert" style="display: none;" role="alert">
+            <span class="alert-icon">⚠️</span>
+            <span class="alert-text" id="checkin-error-text"></span>
+          </div>
+
+          <div class="alert alert-success checkin-success-box" id="checkin-success-card" style="display: none;" role="status">
+            <div class="checkin-success-header">
+              <span class="alert-icon">🎉</span>
+              <strong>Check-In Confirmed!</strong>
+            </div>
+            <div class="checkin-details">
+              <p><strong>Member:</strong> <span id="checkin-res-name"></span> (<span id="checkin-res-email"></span>)</p>
+              <p><strong>Session:</strong> <span id="checkin-res-session"></span></p>
+              <p class="verified-tag">✓ Marked Present in Database</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Create a Session -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2>2. Create a Session</h2>
+            <p class="card-subtext">Add a new 1-hour session. Two sessions cannot share a start time.</p>
+          </div>
+
+          <div class="alert alert-success" id="create-session-success" style="display: none;" role="status">
+            <span class="alert-icon">✅</span>
+            <span class="alert-text" id="create-session-success-text"></span>
+          </div>
+
+          <div class="alert alert-error" id="create-session-error" style="display: none;" role="alert">
+            <span class="alert-icon">⚠️</span>
+            <span class="alert-text" id="create-session-error-text"></span>
+          </div>
+
+          <form id="form-create-session" class="admin-form" novalidate>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="create-date">Session Date</label>
+                <input type="date" id="create-date" class="form-input" required>
+                <span class="field-error" id="error-create-date"></span>
+              </div>
+              <div class="form-group flex-1">
+                <label for="create-hour">Start Hour</label>
+                <select id="create-hour" class="form-input" required></select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="create-capacity">Capacity</label>
+              <input type="text" id="create-capacity" class="form-input input-disabled" value="20 Members (Fixed per gym rules)" disabled>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btn-create-session">Create Session</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 3. See a Session's Bookings -->
+      <div class="admin-card" style="margin-top: 2rem;">
+        <div class="admin-card-header">
+          <h2>3. See a Session's Bookings</h2>
+          <p class="card-subtext">View registered members, check-in codes, and who attended for any session.</p>
+        </div>
+
+        <div class="session-picker-bar">
+          <label for="select-admin-session" class="filter-label">Select Session:</label>
+          <select id="select-admin-session" class="form-input session-picker"></select>
+        </div>
+
+        <div id="admin-bookings-loading" class="center-box" style="display: none;">
+          <div class="spinner"></div>
+          <p class="loading-text">Loading session bookings...</p>
+        </div>
+
+        <div id="admin-bookings-empty" class="empty-box" style="display: none;">
+          <div class="empty-icon">👥</div>
+          <h3>No Bookings for This Session</h3>
+          <p>No members have registered for this slot yet.</p>
+        </div>
+
+        <div class="table-container" id="admin-bookings-table-wrapper" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Member Name</th>
+                <th>Email</th>
+                <th>Check-In Code</th>
+                <th>Status</th>
+                <th>Attended?</th>
+              </tr>
+            </thead>
+            <tbody id="admin-bookings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pure Scripts: API Engine then UI App -->
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

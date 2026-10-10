@@ -91,21 +91,33 @@ function handleRouting() {
   // Hide all views
   document.querySelectorAll('.page-view').forEach((v) => (v.style.display = 'none'));
 
+  const bgVideo = document.getElementById('login-bg-video');
+
   // Show active view
   if (hash === '/login') {
+    document.body.classList.add('auth-page');
     document.getElementById('view-auth').style.display = 'flex';
-  } else if (hash === '/sessions') {
-    document.getElementById('view-sessions').style.display = 'flex';
-    loadSessions();
-    startSessionsPolling();
-  } else if (hash === '/my-bookings') {
-    document.getElementById('view-my-bookings').style.display = 'flex';
-    loadMyBookings();
-  } else if (hash === '/admin') {
-    document.getElementById('view-admin').style.display = 'flex';
-    initAdminPage();
+    if (bgVideo && bgVideo.paused) {
+      bgVideo.play().catch(() => {});
+    }
   } else {
-    navigate('/sessions');
+    document.body.classList.remove('auth-page');
+    if (bgVideo && !bgVideo.paused) {
+      bgVideo.pause();
+    }
+    if (hash === '/sessions') {
+      document.getElementById('view-sessions').style.display = 'flex';
+      loadSessions();
+      startSessionsPolling();
+    } else if (hash === '/my-bookings') {
+      document.getElementById('view-my-bookings').style.display = 'flex';
+      loadMyBookings();
+    } else if (hash === '/admin') {
+      document.getElementById('view-admin').style.display = 'flex';
+      initAdminPage();
+    } else {
+      navigate('/sessions');
+    }
   }
 }
 
@@ -267,6 +279,19 @@ function initAuth() {
     clearAuthFieldErrors();
   }
 
+  // Password show/hide toggle
+  const btnTogglePassword = document.getElementById('btn-toggle-password');
+  const passwordToggleIcon = document.getElementById('password-toggle-icon');
+  if (btnTogglePassword && inputPassword) {
+    btnTogglePassword.addEventListener('click', () => {
+      const isPassword = inputPassword.type === 'password';
+      inputPassword.type = isPassword ? 'text' : 'password';
+      if (passwordToggleIcon) {
+        passwordToggleIcon.textContent = isPassword ? '🙈' : '👁️';
+      }
+    });
+  }
+
   document.getElementById('btn-demo-admin').addEventListener('click', () => fillDemo('admin@gym.com', 'password123'));
   document.getElementById('btn-demo-member1').addEventListener('click', () => fillDemo('khushi@gmail.com', 'password123'));
   document.getElementById('btn-demo-member2').addEventListener('click', () => fillDemo('aditya@gmail.com', 'password123'));
@@ -278,6 +303,197 @@ function initAuth() {
     localStorage.removeItem('user');
     navigate('/login');
   });
+}
+
+// Video Showcase Controls (Autoplay, Mute, Stop/Play & Scrubbing on Hover)
+function initVideoControls() {
+  const video = document.getElementById('login-bg-video');
+  const container = document.getElementById('auth-video-container');
+  const btnPlayPause = document.getElementById('btn-video-playpause');
+  const iconPlayPause = document.getElementById('icon-playpause');
+  const textPlayPause = document.getElementById('text-playpause');
+  const btnMute = document.getElementById('btn-video-mute');
+  const iconMute = document.getElementById('icon-mute');
+  const textMute = document.getElementById('text-mute');
+  const progressContainer = document.getElementById('video-progress-container');
+  const progressFill = document.getElementById('video-progress-fill');
+  const timeDisplay = document.getElementById('video-time-display');
+  const btnFullscreen = document.getElementById('btn-video-fullscreen');
+  const centerIndicator = document.getElementById('video-center-indicator');
+  const centerIcon = document.getElementById('center-icon');
+
+  if (!video) return;
+
+  function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  function triggerCenterRipple(icon) {
+    if (!centerIndicator || !centerIcon) return;
+    centerIcon.textContent = icon;
+    centerIndicator.classList.add('show-pulse');
+    setTimeout(() => {
+      centerIndicator.classList.remove('show-pulse');
+    }, 450);
+  }
+
+  function updatePlayState() {
+    if (!btnPlayPause) return;
+    if (video.paused) {
+      if (iconPlayPause) iconPlayPause.textContent = '▶';
+      if (textPlayPause) textPlayPause.textContent = 'Play';
+      btnPlayPause.title = 'Play video';
+    } else {
+      if (iconPlayPause) iconPlayPause.textContent = '⏸';
+      if (textPlayPause) textPlayPause.textContent = 'Pause';
+      btnPlayPause.title = 'Pause / Stop video';
+    }
+  }
+
+  function updateMuteState() {
+    if (!btnMute) return;
+    if (video.muted) {
+      if (iconMute) iconMute.textContent = '🔇';
+      if (textMute) textMute.textContent = 'Unmute';
+      btnMute.title = 'Unmute sound';
+    } else {
+      if (iconMute) iconMute.textContent = '🔊';
+      if (textMute) textMute.textContent = 'Mute';
+      btnMute.title = 'Mute sound';
+    }
+  }
+
+  // Toggle Play / Pause
+  function togglePlayPause() {
+    if (video.paused) {
+      video.play().then(() => {
+        triggerCenterRipple('▶');
+        updatePlayState();
+      }).catch(() => {});
+    } else {
+      video.pause();
+      triggerCenterRipple('⏸');
+      updatePlayState();
+    }
+  }
+
+  // Toggle Mute / Unmute
+  function toggleMute() {
+    video.muted = !video.muted;
+    if (!video.muted && video.volume === 0) {
+      video.volume = 0.8;
+    }
+    updateMuteState();
+    triggerCenterRipple(video.muted ? '🔇' : '🔊');
+  }
+
+  if (btnPlayPause) {
+    btnPlayPause.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlayPause();
+    });
+  }
+
+  if (btnMute) {
+    btnMute.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMute();
+    });
+  }
+
+  // Video playback is controlled exclusively via the dedicated Pause / Play button
+  // Hovering over the video never stops playback.
+
+  // Time & Progress Updates
+  video.addEventListener('timeupdate', () => {
+    if (!video.duration) return;
+    const pct = (video.currentTime / video.duration) * 100;
+    if (progressFill) progressFill.style.width = `${pct}%`;
+    if (timeDisplay) {
+      timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    }
+  });
+
+  video.addEventListener('play', updatePlayState);
+  video.addEventListener('pause', updatePlayState);
+  video.addEventListener('volumechange', updateMuteState);
+
+  // Scrubber Seeking
+  if (progressContainer) {
+    progressContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rect = progressContainer.getBoundingClientRect();
+      const clickPos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      if (video.duration) {
+        video.currentTime = clickPos * video.duration;
+      }
+    });
+  }
+
+  // Fullscreen
+  if (btnFullscreen) {
+    btnFullscreen.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.fullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (video.requestFullscreen) {
+          video.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    });
+  }
+
+  // Touch Support for Controls on Mobile
+  if (container) {
+    let touchTimer = null;
+    container.addEventListener('touchstart', () => {
+      container.classList.add('controls-active');
+      clearTimeout(touchTimer);
+      touchTimer = setTimeout(() => {
+        container.classList.remove('controls-active');
+      }, 4000);
+    }, { passive: true });
+  }
+
+  // Ensure continuous autoplay and endless looping again and again
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+
+  // Explicit 'ended' event ensures it never stops and loops continuously
+  video.addEventListener('ended', () => {
+    video.currentTime = 0;
+    video.play().catch(() => {});
+  });
+
+  video.addEventListener('error', () => {
+    video.load();
+    video.play().catch(() => {});
+  });
+
+  video.addEventListener('stalled', () => {
+    if (!video.paused) {
+      video.play().catch(() => {});
+    }
+  });
+
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      video.muted = true;
+      video.play().catch(() => {});
+    });
+  }
+  updatePlayState();
+  updateMuteState();
 }
 
 function clearAuthFieldErrors() {
@@ -790,6 +1006,7 @@ function setupAdminForms() {
 window.addEventListener('DOMContentLoaded', async () => {
   await window.ServerAPI.init();
   initAuth();
+  initVideoControls();
   initSessionsFilter();
   window.addEventListener('hashchange', handleRouting);
   handleRouting();

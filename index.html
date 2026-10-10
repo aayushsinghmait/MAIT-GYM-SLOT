@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Gym Slot Booking System - Book 1-hour gym sessions with waitlists and check-in codes. Pure HTML, CSS, JavaScript.">
-  <title>MAIT-Gym-Slot- MAIT Gym Slot Booking System</title>
+  <title>MAIT-Gym-Slot : MAIT Gym Slot Booking System</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
     <div class="nav-container">
       <a href="#/sessions" class="brand-link">
         <span class="brand-icon">🏋️</span>
-        <span class="brand-name">MAIT-Gym-Slot</span>
+        <span class="brand-name">MAITGymSlot</span>
       </a>
 
       <nav class="nav-links" aria-label="Main Navigation">
@@ -39,74 +39,155 @@
   <!-- Main Container -->
   <main class="main-content">
 
-    <!-- ================= PAGE 1: AUTH (LOGIN & REGISTER) ================= -->
+    <!-- ================= PAGE 1: AUTH (SPLIT LAYOUT: VIDEO SHOWCASE + LOGIN BOX) ================= -->
     <section class="page-view" id="view-auth">
-      <div class="auth-card">
-        <div class="auth-header">
-          <div class="auth-logo">🏋️ MAIT-Gym-Slot</div>
-          <h1 id="auth-title">Welcome Back</h1>
-          <p class="auth-subtitle" id="auth-subtitle">Log in to book your 1-hour workout slots</p>
+      <div class="auth-split-wrapper">
+
+        <!-- Left Side: Rounded Video Container with Autoplay, Mute & Hover Controls -->
+        <div class="auth-video-container" id="auth-video-container">
+          <div class="video-media-wrapper">
+            <video
+              id="login-bg-video"
+              class="auth-video-player"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="auto">
+              <source src="img and video/b_create_a_video_for_m.mp4" type="video/mp4">
+              Your browser does not support HTML5 video.
+            </video>
+
+            <!-- Gradient vignettes for cinematic depth -->
+            <div class="video-overlay-gradient"></div>
+
+            <!-- Center Click Feedback Indicator -->
+            <div class="video-center-indicator" id="video-center-indicator">
+              <span id="center-icon">⏸</span>
+            </div>
+
+            <!-- Bottom Controls Bar -->
+            <div class="video-hover-controls" id="video-hover-controls" aria-label="Video Controls">
+              <!-- Progress Scrub Bar -->
+              <div class="video-progress-container" id="video-progress-container" title="Seek position">
+                <div class="video-progress-fill" id="video-progress-fill"></div>
+              </div>
+
+              <div class="video-controls-bottom">
+                <div class="video-controls-left">
+                  <!-- Play / Pause Button -->
+                  <button type="button" class="video-ctrl-btn" id="btn-video-playpause" aria-label="Pause or Play Video" title="Pause / Play">
+                    <span class="ctrl-icon" id="icon-playpause">⏸</span>
+                    <span class="ctrl-text" id="text-playpause">Pause</span>
+                  </button>
+
+                  <!-- Mute / Unmute Button -->
+                  <button type="button" class="video-ctrl-btn" id="btn-video-mute" aria-label="Mute or Unmute Video" title="Mute / Unmute">
+                    <span class="ctrl-icon" id="icon-mute">🔇</span>
+                    <span class="ctrl-text" id="text-mute">Unmute</span>
+                  </button>
+
+                  <span class="video-time-display" id="video-time-display">0:00 / 0:00</span>
+                </div>
+
+                <div class="video-controls-right">
+                  <!-- Fullscreen Button -->
+                  <button type="button" class="video-ctrl-btn video-ctrl-icon" id="btn-video-fullscreen" aria-label="Fullscreen" title="Fullscreen">
+                    ⛶
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Auth Tabs Toggle -->
-        <div class="auth-tabs" role="tablist">
-          <button type="button" class="auth-tab active" id="tab-login" role="tab" aria-selected="true">
-            Log In
-          </button>
-          <button type="button" class="auth-tab" id="tab-register" role="tab" aria-selected="false">
-            Register
-          </button>
-        </div>
-
-        <!-- Auth Error Banner -->
-        <div class="alert alert-error" id="auth-error-banner" style="display: none;" role="alert">
-          <span class="alert-icon">⚠️</span>
-          <span class="alert-text" id="auth-error-text"></span>
-        </div>
-
-        <!-- Auth Form -->
-        <form id="form-auth" class="auth-form" novalidate>
-          <!-- Name field (register only) -->
-          <div class="form-group" id="group-name" style="display: none;">
-            <label for="input-name">Full Name</label>
-            <input type="text" id="input-name" class="form-input" placeholder="e.g. Aayush Singh" autocomplete="name">
-            <span class="field-error" id="error-name"></span>
+        <!-- Right Side: Login Box -->
+        <div class="auth-card" id="auth-card">
+          <div class="auth-header">
+            <div class="auth-logo-badge">
+              <span class="auth-logo-icon">🏋️</span>
+              <span class="auth-logo-text">GymSlot</span>
+            </div>
+            <h1 id="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle" id="auth-subtitle">Log in to book your 1-hour workout slots</p>
           </div>
 
-          <!-- Email field -->
-          <div class="form-group">
-            <label for="input-email">Email Address</label>
-            <input type="email" id="input-email" class="form-input" placeholder="e.g. member@gmail.com" autocomplete="email" required>
-            <span class="field-error" id="error-email"></span>
-          </div>
-
-          <!-- Password field -->
-          <div class="form-group">
-            <label for="input-password">Password</label>
-            <input type="password" id="input-password" class="form-input" placeholder="At least 6 characters" autocomplete="current-password" required>
-            <span class="field-error" id="error-password"></span>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block" id="btn-auth-submit">
-            Log In
-          </button>
-        </form>
-
-        <!-- Quick-Fill Test Accounts -->
-        <div class="demo-box">
-          <p class="demo-title">Quick Test Accounts (Click to autofill):</p>
-          <div class="demo-buttons">
-            <button type="button" class="btn btn-outline btn-xs" id="btn-demo-admin">
-              🔑 Staff Admin
+          <!-- Auth Tabs Toggle -->
+          <div class="auth-tabs" role="tablist">
+            <button type="button" class="auth-tab active" id="tab-login" role="tab" aria-selected="true">
+              Log In
             </button>
-            <button type="button" class="btn btn-outline btn-xs" id="btn-demo-member1">
-              👤 Member (Khushi)
-            </button>
-            <button type="button" class="btn btn-outline btn-xs" id="btn-demo-member2">
-              ⏳ Waitlisted (Aditya)
+            <button type="button" class="auth-tab" id="tab-register" role="tab" aria-selected="false">
+              Register
             </button>
           </div>
+
+          <!-- Auth Error Banner -->
+          <div class="alert alert-error" id="auth-error-banner" style="display: none;" role="alert">
+            <span class="alert-icon">⚠️</span>
+            <span class="alert-text" id="auth-error-text"></span>
+          </div>
+
+          <!-- Auth Form -->
+          <form id="form-auth" class="auth-form" novalidate>
+            <!-- Name field (register only) -->
+            <div class="form-group" id="group-name" style="display: none;">
+              <label for="input-name">Full Name</label>
+              <div class="input-with-icon">
+                <span class="input-icon">👤</span>
+                <input type="text" id="input-name" class="form-input" placeholder="e.g. John Doe" autocomplete="name">
+              </div>
+              <span class="field-error" id="error-name"></span>
+            </div>
+
+            <!-- Email field -->
+            <div class="form-group">
+              <label for="input-email">Email Address</label>
+              <div class="input-with-icon">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="input-email" class="form-input" placeholder="e.g. member@example.com" autocomplete="email" required>
+              </div>
+              <span class="field-error" id="error-email"></span>
+            </div>
+
+            <!-- Password field with Show/Hide toggle -->
+            <div class="form-group">
+              <div class="label-with-hint">
+                <label for="input-password">Password</label>
+              </div>
+              <div class="input-with-icon password-input-wrap">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="input-password" class="form-input" placeholder="At least 6 characters" autocomplete="current-password" required>
+                <button type="button" class="btn-toggle-password" id="btn-toggle-password" aria-label="Toggle password visibility" title="Show or hide password">
+                  <span id="password-toggle-icon">👁️</span>
+                </button>
+              </div>
+              <span class="field-error" id="error-password"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-auth-submit" id="btn-auth-submit">
+              <span>Log In</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </form>
+
+          <!-- Quick-Fill Test Accounts -->
+          <div class="demo-box">
+            <p class="demo-title">⚡ Quick Test Accounts (Click to autofill):</p>
+            <div class="demo-buttons">
+              <button type="button" class="btn btn-outline btn-xs demo-chip" id="btn-demo-admin" title="Staff Admin with full management access">
+                🔑 Staff Admin
+              </button>
+              <button type="button" class="btn btn-outline btn-xs demo-chip" id="btn-demo-member1" title="Active member Khushi">
+                👤 Member (Khushi)
+              </button>
+              <button type="button" class="btn btn-outline btn-xs demo-chip" id="btn-demo-member2" title="Waitlisted member Aditya">
+                ⏳ Waitlisted (Aditya)
+              </button>
+            </div>
+          </div>
         </div>
+
       </div>
     </section>
 

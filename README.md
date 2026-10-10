@@ -54,6 +54,36 @@ MAIT-GYM-SLOT/
 
 > Keep any media folders referenced by `index.html` and `style.css` in the repository so that the video and background assets can load correctly.
 
+## Project Workflow
+
+```text
+MAIT Gym Slot Booking Web Application
+│
+├── 1. Open Website
+│   ├── Login
+│   └── Register
+│
+├── 2. Login as Admin
+│   ├── Access Admin Dashboard
+│   ├── Create Gym Sessions
+│   │   ├── Select Date and Time
+│   │   └── Set Session Capacity
+│   ├── View Created Sessions
+│   ├── View Member Bookings
+│   ├── Check Member Attendance
+│   └── Manage Check-ins
+│
+└── 3. Login as Member
+    ├── Access Member Dashboard
+    ├── Browse Available Gym Sessions
+    ├── Filter Sessions by Date
+    ├── Book a Gym Slot
+    ├── View My Bookings
+    ├── Get Check-in Code
+    └── Join Waitlist When a Session Is Full
+```
+
+
 ## ▶️ Run Locally
 
 1. Clone or download this repository and just open index.html in you browser and see magic.

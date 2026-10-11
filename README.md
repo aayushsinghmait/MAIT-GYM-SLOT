@@ -29,6 +29,7 @@ A responsive gym slot booking web application built for **MAIT Gym** as **Task 2
 ### Interface
 - Dark, neon-inspired fitness theme.
 - HTML, CSS, and vanilla JavaScript.
+- added sqlite for database with the help of node.js and express.
 - Hash-based navigation between application views.
   e.g. gym.com/#home
 - Loading, error, empty, and success feedback in the interface.
@@ -41,16 +42,32 @@ A responsive gym slot booking web application built for **MAIT Gym** as **Task 2
 - **Browser Local Storage** — the current `api.js` implementation stores demo users, sessions, bookings, and waitlist data locally in the browser
 - **Railway** — deployment platform
 
-## 📂 Project Structure
+## Project Structure
 
-```text
-MAIT-GYM-SLOT/
-├── index.html       # Application pages and UI structure
-├── style.css        # Styling and responsive design
-├── app.js           # Front-end controller and navigation
-├── api.js           # In-browser API simulation and booking logic
-└── README.md        # Project documentation
 ```
+MAIT-GYM-SLOT/
+├── index.html          # Frontend SPA
+├── app.js              # Frontend JS (fetch-based API calls)
+├── style.css           # Frontend styles
+├── api.js              # Legacy browser stub (not used — replaced by real backend)
+├── .env.example        # Environment variable template
+├── .env                # Local dev values (git-ignored)
+├── .gitignore
+├── package.json
+└── server/
+    ├── index.js        # Express app entry point
+    ├── db.js           # SQLite connection + schema
+    ├── seed.js         # Test data seeder
+    ├── middleware/
+    │   └── auth.js     # JWT requireAuth + requireAdmin
+    └── routes/
+        ├── auth.js     # POST /api/auth/register|login, GET /api/auth/me
+        ├── sessions.js # GET/POST /api/sessions
+        ├── bookings.js # GET/POST /api/bookings + cancel
+        ├── waitlist.js # POST/GET /api/waitlist + leave
+        └── checkin.js  # POST /api/checkin (admin)
+```
+
 
 > Keep any media folders referenced by `index.html` and `style.css` in the repository so that the video and background assets can load correctly.
 
@@ -86,12 +103,22 @@ MAIT Gym Slot Booking Web Application
 
 ## ▶️ Run Locally
 
-1. Clone or download this repository and just open index.html in you browser and see magic.
-2. Open the project folder in VS Code and run index.html.
-3. Make sure `index.html`, `style.css`, `app.js`, `api.js`, and the referenced media assets are in their expected locations.
-4. Open `index.html` in a browser, or use the **Live Server** extension in VS Code.
+Clone or download this repository and go on your local bash cmd or aother 
+```bash
+# 1. Install dependencies
+npm install
 
-No package installation is required for the current browser-based demo.
+# 2. Copy env (already done — .env is pre-configured for dev)
+cp .env.example .env
+
+# 3. Start the server (seeds the DB on first run automatically)
+npm start
+# → Server running at http://localhost:3000
+```
+
+Open **http://localhost:3000** in your browser.
+
+---
 
 ## 🔑 Demo Login Accounts
 
@@ -104,26 +131,48 @@ The current `api.js` seeds demo accounts when the browser's local demo database 
 |     Member    | `aditya@gmail.com`| `password123` |
 |     Member    | `rohan@gmail.com` | `password123` |
 
+- **Khushi** is booked in the current-hour session (ready to test check-in right now).
+- **Aditya** is on the waitlist for the full session (tomorrow 11:00).
+- The **tomorrow 11:00** session is pre-filled with 20 bookings to test waitlist & the full-session path.
+- 
 These are **demo credentials only**.
 
 ## 🧠 Design Note
 
 - The UI is built with semantic HTML, custom CSS, and vanilla JavaScript.
-- `app.js` manages hash-based navigation, login state, page rendering, and calls to `window.ServerAPI`.
-- `api.js` simulates API routes in the browser and stores four logical collections—users, sessions, bookings, and waitlist—in `localStorage`.
-- Sessions are designed as one-hour slots with a capacity of 20; the UI supports booking, cancellation, waitlisting, and staff check-in flows.
-- The current implementation is a front-end demo, not a production server-backed application.
+- 
+**Stack:** Node.js + Express backend, SQLite database (via `better-sqlite3`), Vanilla HTML/CSS/JS frontend — single-page app with hash routing.
 
+**Data model:** Four relational tables — `users`, `sessions`, `bookings`, `waitlist` — with foreign keys and a `UNIQUE(session_date, start_hour)` constraint enforced at the DB level. Capacity is enforced inside a SQLite `transaction()` so two simultaneous requests can never both see an open seat and both book it.
+
+**Auth:** Passwords hashed with bcrypt (cost 10). JWT tokens signed with HS256, valid 7 days, carried as `Authorization: Bearer <token>`. Admin accounts exist only in the DB seeder — registration always creates members.
+
+**Assumptions:** Sessions start exactly on the hour and last exactly 60 minutes. Check-in is only possible during that 60-minute window. Nobody on the waitlist can be promoted into a session that has already started. A member cannot be on the same session's waitlist twice.
+
+---
 ### Acknowledgements & Learning Resources
 
-During the development of this MAIT Gym Slot Booking Web Application, I used ChatGPT to generate the images used on the website and to get inspiration for the colour combinations. The videos featured on the website were created using the Arena.ai platform. Whenever I faced technical challenges, I referred to Google Search and MDN Web Docs to understand concepts and learn how to implement features—for example, displaying an outline when hovering the mouse over a button. I also took guidance from my senior on certain aspects of the project and clarified my doubts about HTML elements and concepts such as `id`, `class`, `div`, and `span`. This project helped me improve my web development skills, explore new concepts, and learn how to solve problems independently.
+During the development of this MAIT Gym Slot Booking Web Application, I used ChatGPT to generate the images used on the website and to get inspiration for the colour combinations. The videos featured on the website were created using the Arena.ai platform. Whenever I faced technical challenges, I referred to Google Search and MDN Web Docs to understand concepts and learn how to implement features—for example, displaying an outline when hovering the mouse over a button. I also took guidance from my senior on certain aspects of the project and clarified my doubts about HTML elements and concepts such as `id`, `class`, `div`, and `span`. This project helped me improve my web development skills, explore new concepts, and learn how to solve problems independently. for understanding the logic of node.js ,express, sqlite i used many youtube channels and where got problem writing and connect sqlite so only on that part i use vs studio code agent to correct code of sqlite and node.js only.
 
 
-## ⚠️ Implementation Notes
+## API Reference
 
-The challenge brief asks for a backend API backed by a real database, server-side authentication and authorization, and protection against simultaneous bookings exceeding capacity. In the submitted code, `api.js` is an **in-browser API simulation** and uses `localStorage`; it does not connect to a separate server or a shared relational database. Browser-local data is not shared between users or devices and can be modified by the user.
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/register` | Public | Register (always member) |
+| POST | `/api/auth/login` | Public | Login, returns JWT |
+| GET | `/api/auth/me` | Member | Current user info |
+| GET | `/api/sessions?date=` | Member | List sessions with seat counts |
+| POST | `/api/sessions` | Admin | Create session |
+| POST | `/api/bookings` | Member | Book a slot (atomic) |
+| GET | `/api/bookings/my` | Member | My bookings |
+| GET | `/api/bookings/session/:id` | Admin | All bookings for a session |
+| POST | `/api/bookings/:id/cancel` | Member/Admin | Cancel + auto-promote waitlist |
+| POST | `/api/waitlist` | Member | Join waitlist for full session |
+| GET | `/api/waitlist/my` | Member | My waitlist positions |
+| POST | `/api/waitlist/:sessionId/leave` | Member | Leave waitlist |
+| POST | `/api/checkin` | Admin | Mark member present (code, once, during session hour) |
 
-For a production-ready version, move authentication and booking rules to a real backend, use a relational database such as MYSQL, enforce capacity and uniqueness constraints on the server/database, store secrets in environment variables, and never rely on client-side checks as the security boundary.
 
 ## 📋 Task Context
 

@@ -1,14 +1,11 @@
 // ============================================================================
 // api.js - In-Browser Simulated Server API & Relational Database Engine
-// 
-// Implements full backend API specification:
 // - Real relational tables: users, sessions, bookings, waitlist
 // - Atomic transactions preventing booking beyond 20 capacity
 // - Real HTTP status codes: 200, 201, 400, 401, 403, 404, 409
 // - Waitlist automatic queue promotion on cancellation
 // - Secure check-in: single-use, strictly during 1-hour session window
 // ============================================================================
-
 const STORAGE_KEY = 'gym_database_v1';
 
 // Unguessable 6-character code generator

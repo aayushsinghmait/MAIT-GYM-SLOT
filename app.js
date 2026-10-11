@@ -1,8 +1,10 @@
 // ========================================================
 // GymSlot - Pure Vanilla JavaScript Application Controller
 // Single Page Application with Hash Routing & Optimistic UI
-// Uses window.ServerAPI for backend requests and database
+// Calls the real Express REST API at /api/*
 // ========================================================
+
+const API_BASE = '/api';
 
 const state = {
   token: localStorage.getItem('token') || null,
@@ -14,21 +16,26 @@ const state = {
   isActionInFlight: false
 };
 
-// API Call Wrapper
+// API Call Wrapper — real HTTP fetch to /api/*
 async function api(endpoint, method = 'GET', body = null) {
-  const res = await window.ServerAPI.request(endpoint, {
+  const headers = { 'Content-Type': 'application/json' };
+  if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
+
+  const res = await fetch(`${API_BASE}${endpoint}`, {
     method,
-    token: state.token,
-    body: body ? JSON.stringify(body) : null
+    headers,
+    body: body ? JSON.stringify(body) : undefined
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    const err = new Error(res.data.error || 'Request failed');
+    const err = new Error(data.error || 'Request failed');
     err.status = res.status;
     throw err;
   }
 
-  return res.data;
+  return data;
 }
 
 // Helpers
@@ -370,7 +377,6 @@ function initVideoControls() {
     }
   }
 
-  // Toggle Play / Pause
   function togglePlayPause() {
     if (video.paused) {
       video.play().then(() => {
@@ -384,7 +390,6 @@ function initVideoControls() {
     }
   }
 
-  // Toggle Mute / Unmute
   function toggleMute() {
     video.muted = !video.muted;
     if (!video.muted && video.volume === 0) {
@@ -408,10 +413,6 @@ function initVideoControls() {
     });
   }
 
-  // Video playback is controlled exclusively via the dedicated Pause / Play button
-  // Hovering over the video never stops playback.
-
-  // Time & Progress Updates
   video.addEventListener('timeupdate', () => {
     if (!video.duration) return;
     const pct = (video.currentTime / video.duration) * 100;
@@ -425,7 +426,6 @@ function initVideoControls() {
   video.addEventListener('pause', updatePlayState);
   video.addEventListener('volumechange', updateMuteState);
 
-  // Scrubber Seeking
   if (progressContainer) {
     progressContainer.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -437,7 +437,6 @@ function initVideoControls() {
     });
   }
 
-  // Fullscreen
   if (btnFullscreen) {
     btnFullscreen.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -455,7 +454,6 @@ function initVideoControls() {
     });
   }
 
-  // Touch Support for Controls on Mobile
   if (container) {
     let touchTimer = null;
     container.addEventListener('touchstart', () => {
@@ -467,12 +465,10 @@ function initVideoControls() {
     }, { passive: true });
   }
 
-  // Ensure continuous autoplay and endless looping again and again
   video.muted = true;
   video.loop = true;
   video.playsInline = true;
 
-  // Explicit 'ended' event ensures it never stops and loops continuously
   video.addEventListener('ended', () => {
     video.currentTime = 0;
     video.play().catch(() => {});
@@ -609,10 +605,9 @@ async function handleBookSlot(sessionId) {
   const session = state.sessions.find((s) => s.id === sessionId);
   if (!session) return;
 
-  // Snapshot before change
   const previousState = JSON.parse(JSON.stringify(state.sessions));
 
-  // 1. Optimistic update
+  // Optimistic update
   session.confirmed_count++;
   session.seats_remaining = Math.max(0, session.capacity - session.confirmed_count);
   session.is_full = session.seats_remaining === 0;
@@ -631,7 +626,6 @@ async function handleBookSlot(sessionId) {
     showToast(`🎉 Slot booked! Your check-in code is "${data.booking.checkin_code}"`);
     await loadSessions(true);
   } catch (err) {
-    // Rollback state if server refused
     state.sessions = previousState;
     renderSessionsGrid();
     showToast(`Booking failed: ${err.message}`, 'error');
@@ -1007,8 +1001,7 @@ function setupAdminForms() {
 }
 
 // --- INIT APP ---
-window.addEventListener('DOMContentLoaded', async () => {
-  await window.ServerAPI.init();
+window.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initVideoControls();
   initSessionsFilter();

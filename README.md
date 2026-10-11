@@ -4,7 +4,7 @@ A responsive gym slot booking web application built for **MAIT Gym** as **Task 2
 
 ## 🚀 Live Demo
 
-**[Open MAIT Gym Slot Booking](https://mait-gym-slot-production.up.railway.app)**
+**[Open MAIT Gym Slot Booking](mait-gym-slot-production-c07a.up.railway.app)**
 
 
 ## ✨ Features

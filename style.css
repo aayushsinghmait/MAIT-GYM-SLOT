@@ -1,72 +1,53 @@
-/* ========================================================
-   GymSlot - Pure CSS Stylesheet
-   Theme Colors: #151020, #A855F7, #EC4899, #FB923C, #FFFFFF
-   Responsive down to 360px, accessible, cyber-fitness dark theme
-   ======================================================== */
+/* GymSlot - Pure CSS Stylesheet
+   Theme Colors: #151020, #A855F7, #EC4899, #FB923C, #FFFFFF*/
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
-  /* Core 5-Color System Requested */
-  --color-base: #151020;        /* Deep obsidian purple background */
-  --color-purple: #a855f7;      /* Electric neon violet */
-  --color-pink: #ec4899;        /* Hot magenta / pink */
-  --color-orange: #fb923c;      /* Sunset neon amber / orange */
-  --color-white: #ffffff;       /* Pure crisp white */
-
-  /* UI Tokens */
+  --color-base: #151020;        
+  --color-purple: #a855f7;      
+  --color-pink: #ec4899;        
+  --color-orange: #fb923c;      
+  --color-white: #ffffff; 
   --bg-main: #151020;
   --bg-surface: rgba(26, 19, 41, 0.78);
   --bg-surface-solid: #1b132c;
   --bg-surface-hover: rgba(38, 27, 59, 0.88);
   --bg-input: rgba(16, 11, 26, 0.85);
-
   --border-color: rgba(168, 85, 247, 0.22);
   --border-hover: rgba(168, 85, 247, 0.55);
   --border-focus: #a855f7;
-
   --text-primary: #ffffff;
   --text-secondary: #cbd5e1;
   --text-muted: #8b80a4;
-
   --accent: #a855f7;
   --accent-hover: #9333ea;
   --accent-light: rgba(168, 85, 247, 0.16);
   --accent-glow: rgba(168, 85, 247, 0.4);
-
   --gym-orange: #fb923c;
   --gym-orange-hover: #f97316;
   --gym-orange-light: rgba(251, 146, 60, 0.18);
   --gym-gold: #fbbf24;
-
   --danger: #f43f5e;
   --danger-light: rgba(244, 63, 94, 0.18);
-
   --warning: #fb923c;
   --warning-light: rgba(251, 146, 60, 0.18);
-
   --info: #a855f7;
   --info-light: rgba(168, 85, 247, 0.18);
-
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-xl: 26px;
-
   --font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
 html {
   color-scheme: dark;
 }
-
 body {
   font-family: var(--font-family);
   background-color: var(--bg-main);
@@ -79,34 +60,26 @@ body {
   overflow-x: hidden;
   transition: background 0.3s ease;
 }
-
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: #151020;
 }
-
 ::-webkit-scrollbar-thumb {
   background: rgba(168, 85, 247, 0.3);
   border-radius: 999px;
   border: 2px solid #151020;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(236, 72, 153, 0.5);
 }
 
-/* ========================================================
-   MAIN SESSION BOOKING PAGE BACKGROUND IMAGE & OVERLAYS
-   ======================================================== */
+/* MAIN SESSION BOOKING PAGE BACKGROUND IMAGE & OVERLAYS */
 body.sessions-page {
   background-color: #151020;
 }
-
 body.sessions-page::before {
   content: "";
   position: fixed;
@@ -124,13 +97,10 @@ body.sessions-page::before {
   pointer-events: none;
   animation: ambient-drift 20s ease-in-out infinite alternate;
 }
-
 @keyframes ambient-drift {
   0% { transform: scale(1); }
   100% { transform: scale(1.02); }
 }
-
-/* Gym Ambient Background for Auth / First Page */
 body.auth-page {
   background: 
     radial-gradient(circle at 10% 20%, rgba(251, 146, 60, 0.22) 0%, transparent 45%),
@@ -139,7 +109,6 @@ body.auth-page {
     url('img and video/WhatsApp Image 2026-10-10 at 8.53.22 AM.jpeg') center center / cover no-repeat fixed;
   background-color: #151020;
 }
-
 a {
   color: var(--accent);
   text-decoration: none;
@@ -150,17 +119,12 @@ a:hover {
   color: var(--color-pink);
   text-decoration: none;
 }
-
-/* Accessible focus ring */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
 }
-
-/* ========================================================
-   TOP NAVBAR
-   ======================================================== */
+/* TOP NAVBAR */
 .navbar {
   background: rgba(21, 16, 32, 0.85);
   backdrop-filter: blur(20px);
@@ -171,7 +135,6 @@ a:hover {
   z-index: 100;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
-
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -182,7 +145,6 @@ a:hover {
   gap: 1.25rem;
   flex-wrap: wrap;
 }
-
 .brand-link {
   display: flex;
   align-items: center;
@@ -287,9 +249,7 @@ a:hover {
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.25);
 }
 
-/* ========================================================
-   MAIN CONTENT CONTAINER
-   ======================================================== */
+/* MAIN CONTENT CONTAINER */
 .main-content {
   flex: 1;
   max-width: 1200px;
@@ -297,13 +257,11 @@ a:hover {
   width: 100%;
   padding: 2rem 1.25rem 3.5rem;
 }
-
 body.auth-page {
   height: 100vh;
   max-height: 100vh;
   overflow: hidden;
 }
-
 body.auth-page .main-content {
   max-width: 1100px;
   width: 100%;
@@ -322,7 +280,6 @@ body.auth-page .main-content {
   flex-direction: column;
   gap: 1.75rem;
 }
-
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -330,7 +287,6 @@ body.auth-page .main-content {
   flex-wrap: wrap;
   gap: 1.25rem;
 }
-
 .page-header h1 {
   font-size: 2.1rem;
   font-weight: 800;
@@ -339,13 +295,11 @@ body.auth-page .main-content {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .page-subtitle {
   color: var(--text-secondary);
   font-size: 0.98rem;
   margin-top: 0.35rem;
 }
-
 .page-header-badge {
   display: inline-flex;
   align-items: center;
@@ -361,7 +315,6 @@ body.auth-page .main-content {
   border-radius: 999px;
   margin-bottom: 0.5rem;
 }
-
 .page-header-badge .badge-dot {
   width: 7px;
   height: 7px;
@@ -369,7 +322,6 @@ body.auth-page .main-content {
   background: var(--color-orange);
   box-shadow: 0 0 8px var(--color-orange);
 }
-
 .live-pill {
   display: flex;
   align-items: center;
@@ -399,9 +351,7 @@ body.auth-page .main-content {
   50% { opacity: 0.35; transform: scale(0.8); }
 }
 
-/* ========================================================
-   TOASTS & NOTIFICATIONS
-   ======================================================== */
+/* TOASTS & NOTIFICATIONS */
 .toast-container {
   position: fixed;
   top: 1.25rem;
@@ -413,7 +363,6 @@ body.auth-page .main-content {
   max-width: 440px;
   width: calc(100% - 2.5rem);
 }
-
 .toast {
   background: rgba(26, 19, 41, 0.92);
   border: 1px solid var(--border-color);
@@ -429,7 +378,6 @@ body.auth-page .main-content {
   color: #ffffff;
   animation: slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 @keyframes slide-in {
   from { opacity: 0; transform: translateY(-12px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -444,7 +392,6 @@ body.auth-page .main-content {
   border-color: rgba(244, 63, 94, 0.6);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(244, 63, 94, 0.3);
 }
-
 /* Alerts */
 .alert {
   padding: 0.95rem 1.25rem;
@@ -467,15 +414,11 @@ body.auth-page .main-content {
   border: 1px solid rgba(168, 85, 247, 0.45);
   color: #f3e8ff;
 }
-
 .alert-icon {
   font-size: 1.25rem;
   flex-shrink: 0;
 }
-
-/* ========================================================
-   BUTTONS (CYBER-FITNESS VIBRANT GLOW)
-   ======================================================== */
+/* BUTTONS (CYBER-FITNESS VIBRANT GLOW) */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -507,14 +450,12 @@ body.auth-page .main-content {
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 6px 18px -2px rgba(168, 85, 247, 0.45), 0 0 12px rgba(236, 72, 153, 0.25);
 }
-
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, #b96bfa 0%, #a855f7 50%, #f472b6 100%);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px -2px rgba(168, 85, 247, 0.65), 0 0 20px rgba(236, 72, 153, 0.45);
   text-decoration: none;
 }
-
 /* Secondary Button (Smoked Glass with Neon Border) */
 .btn-secondary {
   background-color: rgba(38, 27, 59, 0.7);
@@ -522,7 +463,6 @@ body.auth-page .main-content {
   border: 1px solid rgba(168, 85, 247, 0.35);
   backdrop-filter: blur(10px);
 }
-
 .btn-secondary:hover:not(:disabled) {
   background-color: rgba(168, 85, 247, 0.25);
   border-color: rgba(168, 85, 247, 0.65);
@@ -530,7 +470,6 @@ body.auth-page .main-content {
   box-shadow: 0 6px 18px rgba(168, 85, 247, 0.25);
   text-decoration: none;
 }
-
 /* Outline Button */
 .btn-outline {
   background-color: rgba(21, 16, 32, 0.5);
@@ -538,7 +477,6 @@ body.auth-page .main-content {
   border: 1px solid var(--border-color);
   backdrop-filter: blur(8px);
 }
-
 .btn-outline:hover:not(:disabled) {
   color: #ffffff;
   background-color: rgba(168, 85, 247, 0.18);
@@ -547,35 +485,30 @@ body.auth-page .main-content {
   box-shadow: 0 4px 14px rgba(168, 85, 247, 0.25);
   text-decoration: none;
 }
-
 .btn-outline-danger {
   background-color: transparent;
   color: var(--danger);
   border: 1px solid rgba(244, 63, 94, 0.4);
 }
-
 .btn-outline-danger:hover:not(:disabled) {
   background-color: var(--danger-light);
   border-color: var(--danger);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
 }
-
-/* Warning Button / Waitlist Button (Warm Neon Amber/Orange) */
+/* Warning Button */
 .btn-warning {
   background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 6px 18px -2px rgba(251, 146, 60, 0.45);
 }
-
 .btn-warning:hover:not(:disabled) {
   background: linear-gradient(135deg, #fdba74 0%, #f97316 100%);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px -2px rgba(251, 146, 60, 0.65);
   text-decoration: none;
 }
-
 .btn-disabled {
   background-color: rgba(38, 27, 59, 0.4);
   color: var(--text-muted);
@@ -597,9 +530,7 @@ body.auth-page .main-content {
   width: 100%;
 }
 
-/* ========================================================
-   FORMS & INPUTS
-   ======================================================== */
+/* FORMS & INPUTS*/
 .form-group {
   display: flex;
   flex-direction: column;
@@ -650,18 +581,15 @@ body.auth-page .main-content {
   min-height: 1.1rem;
   display: block;
 }
-
 .form-row {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
 }
-
 .flex-1 {
   flex: 1;
   min-width: 180px;
 }
-
 /* Loading & Empty States */
 .center-box {
   display: flex;
@@ -671,7 +599,6 @@ body.auth-page .main-content {
   padding: 4rem 1.5rem;
   text-align: center;
 }
-
 .spinner {
   width: 42px;
   height: 42px;
@@ -687,13 +614,11 @@ body.auth-page .main-content {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
 .loading-text {
   color: var(--text-secondary);
   font-size: 0.95rem;
   font-weight: 500;
 }
-
 .empty-box {
   background: var(--bg-surface);
   border: 1px dashed var(--border-color);
@@ -705,7 +630,6 @@ body.auth-page .main-content {
   color: var(--text-secondary);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
-
 .empty-icon {
   font-size: 3rem;
   margin-bottom: 0.85rem;
@@ -719,9 +643,7 @@ body.auth-page .main-content {
   font-size: 1.3rem;
 }
 
-/* ========================================================
-   PAGE 1: AUTH SPLIT LAYOUT (VIDEO SHOWCASE + LOGIN)
-   ======================================================== */
+/* PAGE 1: AUTH SPLIT LAYOUT (VIDEO SHOWCASE + LOGIN) */
 #view-auth {
   display: flex;
   justify-content: center;
@@ -753,7 +675,6 @@ body.auth-page .main-content {
   box-sizing: border-box;
   align-items: stretch;
 }
-
 .auth-split-wrapper::before {
   content: "";
   position: absolute;
@@ -763,7 +684,6 @@ body.auth-page .main-content {
   height: 3px;
   background: linear-gradient(90deg, #fb923c 0%, #ec4899 50%, #a855f7 100%);
 }
-
 .auth-video-container {
   position: relative;
   border-radius: 16px;
@@ -775,7 +695,6 @@ body.auth-page .main-content {
   min-height: 0;
   display: flex;
 }
-
 .video-media-wrapper {
   position: relative;
   width: 100%;
@@ -787,7 +706,6 @@ body.auth-page .main-content {
   align-items: center;
   justify-content: center;
 }
-
 .auth-video-player {
   position: absolute;
   inset: 0;
@@ -796,14 +714,12 @@ body.auth-page .main-content {
   object-fit: cover;
   display: block;
 }
-
 .video-overlay-gradient {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(21, 16, 32, 0.2) 0%, transparent 40%, rgba(21, 16, 32, 0.85) 100%);
   pointer-events: none;
 }
-
 .video-center-indicator {
   position: absolute;
   top: 50%;
@@ -826,12 +742,10 @@ body.auth-page .main-content {
   z-index: 12;
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
 }
-
 .video-center-indicator.show-pulse {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
-
 .video-hover-controls {
   position: absolute;
   bottom: 0;
@@ -857,7 +771,6 @@ body.auth-page .main-content {
   transform: translateY(0);
   pointer-events: auto;
 }
-
 .video-progress-container {
   width: 100%;
   height: 5px;
@@ -867,11 +780,9 @@ body.auth-page .main-content {
   position: relative;
   transition: height 0.15s ease;
 }
-
 .video-progress-container:hover {
   height: 7px;
 }
-
 .video-progress-fill {
   height: 100%;
   width: 0%;
@@ -880,7 +791,6 @@ body.auth-page .main-content {
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
   transition: width 0.05s linear;
 }
-
 .video-controls-bottom {
   display: flex;
   align-items: center;
@@ -960,12 +870,10 @@ body.auth-page .main-content {
   justify-content: center;
   margin-bottom: 0.2rem;
 }
-
 .auth-logo-icon {
   font-size: 1.6rem;
   filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.6));
 }
-
 .auth-logo-text {
   font-size: 1.45rem;
   font-weight: 800;
@@ -981,7 +889,6 @@ body.auth-page .main-content {
   color: #ffffff;
   margin-bottom: 0.1rem;
 }
-
 .auth-subtitle {
   color: var(--text-secondary);
   font-size: 0.78rem;
@@ -1146,9 +1053,7 @@ body.auth-page .main-content {
   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 
-/* ========================================================
-   PAGE 2: SESSIONS VIEW (CARDS, METERS, FILTERS)
-   ======================================================== */
+/* PAGE 2: SESSIONS VIEW (CARDS, METERS, FILTERS)*/
 .filter-bar {
   display: flex;
   align-items: center;
@@ -1375,9 +1280,7 @@ body.auth-page .main-content {
   box-shadow: 0 0 12px rgba(251, 146, 60, 0.2);
 }
 
-/* ========================================================
-   PAGE 3: MY BOOKINGS VIEW
-   ======================================================== */
+/* PAGE 3: MY BOOKINGS VIEW */
 .section-block {
   display: flex;
   flex-direction: column;
@@ -1576,9 +1479,7 @@ body.auth-page .main-content {
   margin-top: 0.5rem;
 }
 
-/* ========================================================
-   PAGE 4: STAFF ADMIN DESK
-   ======================================================== */
+/* PAGE 4: STAFF ADMIN DESK */
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -1677,7 +1578,6 @@ body.auth-page .main-content {
   font-size: 0.92rem;
   text-align: left;
 }
-
 .data-table th {
   padding: 0.85rem 1rem;
   background-color: rgba(38, 27, 59, 0.9);
@@ -1685,22 +1585,18 @@ body.auth-page .main-content {
   font-weight: 700;
   border-bottom: 1px solid var(--border-color);
 }
-
 .data-table td {
   padding: 0.85rem 1rem;
   border-bottom: 1px solid rgba(168, 85, 247, 0.15);
   color: var(--text-secondary);
 }
-
 .data-table tr:hover {
   background-color: rgba(168, 85, 247, 0.08);
 }
-
 .row-cancelled {
   opacity: 0.5;
   text-decoration: line-through;
 }
-
 .code-badge {
   font-family: 'SF Mono', Monaco, Consolas, monospace;
   font-weight: 800;
@@ -1711,17 +1607,13 @@ body.auth-page .main-content {
   color: #f5d0fe;
   border: 1px solid rgba(168, 85, 247, 0.4);
 }
-
-/* ========================================================
-   RESPONSIVE DESIGN (DOWN TO 360PX)
-   ======================================================== */
+/* RESPONSIVE DESIGN (DOWN TO 360PX) */
 @media (max-width: 860px) {
   body.auth-page {
     height: auto;
     min-height: 100vh;
     overflow-y: auto;
   }
-
   body.auth-page .main-content {
     height: auto;
     min-height: 100vh;
@@ -1729,7 +1621,6 @@ body.auth-page .main-content {
     overflow: visible;
     padding: 1rem;
   }
-
   .auth-split-wrapper {
     display: flex;
     flex-direction: column;
@@ -1739,71 +1630,58 @@ body.auth-page .main-content {
     padding: 1.25rem 1rem;
     border-radius: 18px;
   }
-
   .auth-card {
     order: 1;
     height: auto;
     padding: 1.25rem 1rem;
   }
-
   .auth-video-container {
     order: 2;
     height: 250px;
     min-height: 220px;
     border-radius: 14px;
   }
-
   .video-media-wrapper {
     min-height: 220px;
   }
-
   .video-hover-controls {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
   }
 }
-
 @media (max-width: 640px) {
   .nav-container {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .nav-links {
     width: 100%;
     justify-content: space-between;
   }
-
   .nav-user {
     width: 100%;
     justify-content: space-between;
     padding-top: 0.5rem;
     border-top: 1px solid var(--border-color);
   }
-
   .filter-bar {
     flex-direction: column;
     align-items: stretch;
   }
-
   .filter-date-input {
     max-width: 100%;
   }
-
   .booking-card {
     flex-direction: column;
     align-items: stretch;
   }
-
   .code-display-box {
     width: 100%;
   }
-
   .code-entry-row {
     flex-direction: column;
   }
-
   .admin-grid {
     grid-template-columns: 1fr;
   }

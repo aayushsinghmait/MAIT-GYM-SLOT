@@ -3,6 +3,11 @@
 
 const router = require('express').Router();
 const { requireAuth } = require('./auth');
+const {
+  getSessionStart,
+  getSessionEnd,
+  cleanupExpiredSessions
+} = require('../utils/sessionTime');
 
 function requireAdmin(req, res, next) {
   if (req.user.role !== 'admin') {
@@ -19,6 +24,8 @@ function requireAdmin(req, res, next) {
 //   - codes are random and not guessable from each other
 router.post('/', requireAuth, requireAdmin, (req, res) => {
   const db   = req.db;
+  cleanupExpiredSessions(db);
+
   const code = String(req.body.code || '').trim().toUpperCase();
 
   if (!code) {
@@ -51,14 +58,13 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
   }
 
   // Strictly within the 1-hour session window
-  const startHourStr = String(session.start_hour).padStart(2, '0');
-  const sessionStart = new Date(`${session.session_date}T${startHourStr}:00:00`);
-  const sessionEnd   = new Date(sessionStart.getTime() + 60 * 60 * 1000);
+  const sessionStart = getSessionStart(session.session_date, session.start_hour);
+  const sessionEnd   = getSessionEnd(session.session_date, session.start_hour);
   const now          = new Date();
 
   if (now < sessionStart) {
     return res.status(400).json({
-      error: `Check-in is only allowed during session hour (${session.session_date} at ${startHourStr}:00). Session has not started yet.`
+      error: `Check-in is only allowed during session hour (${session.session_date} at ${String(session.start_hour).padStart(2, '0')}:00). Session has not started yet.`
     });
   }
 

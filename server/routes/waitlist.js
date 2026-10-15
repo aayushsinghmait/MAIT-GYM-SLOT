@@ -3,16 +3,18 @@
 
 const router = require('express').Router();
 const { requireAuth } = require('./auth');
-
-function isSessionStarted(sessionDate, startHour) {
-  const sessionStart = new Date(`${sessionDate}T${String(startHour).padStart(2, '0')}:00:00`);
-  return new Date() >= sessionStart;
-}
+const {
+  isSessionStarted,
+  isSessionOver,
+  cleanupExpiredSessions
+} = require('../utils/sessionTime');
 
 // POST /api/waitlist — join waitlist for a full session
 router.post('/', requireAuth, (req, res) => {
   const db        = req.db;
   const sessionId = Number(req.body.session_id);
+
+  cleanupExpiredSessions(db);
 
   if (!Number.isInteger(sessionId) || sessionId < 1) {
     return res.status(400).json({ error: 'Valid session_id is required' });
@@ -21,8 +23,8 @@ router.post('/', requireAuth, (req, res) => {
   const session = db.get('SELECT * FROM sessions WHERE id = ?', sessionId);
   if (!session) return res.status(404).json({ error: 'Session not found' });
 
-  if (isSessionStarted(session.session_date, session.start_hour)) {
-    return res.status(400).json({ error: 'Cannot join waitlist for a session that has already started' });
+  if (isSessionStarted(session.session_date, session.start_hour) || isSessionOver(session.session_date, session.start_hour)) {
+    return res.status(400).json({ error: 'Cannot join waitlist for a session that has already started or ended' });
   }
 
   // Cannot join waitlist if already confirmed booked
@@ -108,7 +110,9 @@ router.post('/:sessionId/leave', requireAuth, (req, res) => {
 // GET /api/waitlist/my — member sees their active waitlist entries
 router.get('/my', requireAuth, (req, res) => {
   const db  = req.db;
-  const rows = db.all(`
+  cleanupExpiredSessions(db);
+
+  const rawRows = db.all(`
     SELECT w.id, w.session_id, w.status, w.created_at,
            s.session_date, s.start_hour
     FROM waitlist w
@@ -117,7 +121,11 @@ router.get('/my', requireAuth, (req, res) => {
     ORDER BY w.id
   `, req.user.id);
 
-  const waitlist = rows.map(w => {
+  // User screen requirement:
+  // When date and time of session is over, it is NOT visible on user screen
+  const visibleRows = rawRows.filter(w => !isSessionOver(w.session_date, w.start_hour));
+
+  const waitlist = visibleRows.map(w => {
     const posRow = db.get(
       "SELECT COUNT(*) as cnt FROM waitlist WHERE session_id = ? AND status = 'waiting' AND id <= ?",
       w.session_id, w.id
@@ -129,7 +137,8 @@ router.get('/my', requireAuth, (req, res) => {
       session_date: w.session_date,
       start_hour:   Number(w.start_hour),
       position:     posRow ? Number(posRow.cnt) : 1,
-      has_started:  isSessionStarted(w.session_date, w.start_hour)
+      has_started:  isSessionStarted(w.session_date, w.start_hour),
+      is_over:      isSessionOver(w.session_date, w.start_hour)
     };
   });
 
@@ -137,3 +146,4 @@ router.get('/my', requireAuth, (req, res) => {
 });
 
 module.exports = router;
+

@@ -3,17 +3,17 @@
 
 const router = require('express').Router();
 const { requireAuth } = require('./auth');
+const {
+  isSessionStarted,
+  isSessionOver,
+  cleanupExpiredSessions
+} = require('../utils/sessionTime');
 
 function requireAdmin(req, res, next) {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Forbidden: Admin access required.' });
   }
   next();
-}
-
-function isSessionStarted(sessionDate, startHour) {
-  const sessionStart = new Date(`${sessionDate}T${String(startHour).padStart(2, '0')}:00:00`);
-  return new Date() >= sessionStart;
 }
 
 const CODE_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -32,7 +32,11 @@ function uniqueCode(db) {
 // GET /api/bookings/my
 router.get('/my', requireAuth, (req, res) => {
   const db = req.db;
-  const bookings = db.all(`
+
+  // Clean up any data older than 5 days
+  cleanupExpiredSessions(db);
+
+  const rawBookings = db.all(`
     SELECT b.id, b.session_id, b.checkin_code, b.status, b.attended, b.attended_at, b.created_at,
            s.session_date, s.start_hour
     FROM bookings b
@@ -41,8 +45,12 @@ router.get('/my', requireAuth, (req, res) => {
     ORDER BY b.id DESC
   `, req.user.id);
 
+  // User screen requirement:
+  // When date and time of session is over, it is NOT visible on user screen
+  const visibleBookings = rawBookings.filter(b => !isSessionOver(b.session_date, b.start_hour));
+
   res.json({
-    bookings: bookings.map(b => ({
+    bookings: visibleBookings.map(b => ({
       id:           Number(b.id),
       session_id:   Number(b.session_id),
       checkin_code: b.checkin_code,
@@ -51,7 +59,8 @@ router.get('/my', requireAuth, (req, res) => {
       attended_at:  b.attended_at,
       session_date: b.session_date,
       start_hour:   Number(b.start_hour),
-      has_started:  isSessionStarted(b.session_date, b.start_hour)
+      has_started:  isSessionStarted(b.session_date, b.start_hour),
+      is_over:      isSessionOver(b.session_date, b.start_hour)
     }))
   });
 });
@@ -59,6 +68,8 @@ router.get('/my', requireAuth, (req, res) => {
 // GET /api/bookings/session/:id — admin only
 router.get('/session/:id', requireAuth, requireAdmin, (req, res) => {
   const db = req.db;
+  cleanupExpiredSessions(db);
+
   const sessionId = Number(req.params.id);
   if (!Number.isInteger(sessionId) || sessionId < 1) {
     return res.status(400).json({ error: 'Invalid session id' });

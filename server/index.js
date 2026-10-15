@@ -28,6 +28,11 @@ async function main() {
   const seedModule = require('./seed');
   await seedModule(db);
 
+  // Retention policy: automatically purge sessions older than 5 days
+  const { cleanupExpiredSessions } = require('./utils/sessionTime');
+  cleanupExpiredSessions(db);
+  setInterval(() => cleanupExpiredSessions(db), 60 * 1000);
+
   // Inject db into every request
   app.use((req, _res, next) => {
     req.db = db;

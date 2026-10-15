@@ -39,6 +39,13 @@ async function api(endpoint, method = 'GET', body = null) {
 }
 
 // Helpers
+function isSessionOver(sessionDate, startHour) {
+  if (!sessionDate) return false;
+  const [year, month, day] = String(sessionDate).split('-').map(Number);
+  const sessionEnd = new Date(year, month - 1, day, Number(startHour) + 1, 0, 0, 0);
+  return new Date() >= sessionEnd;
+}
+
 function formatHour(hour) {
   const h = Number(hour);
   const start = `${String(h).padStart(2, '0')}:00`;
@@ -520,7 +527,11 @@ async function loadSessions(isPolling = false) {
     const data = await api(url);
 
     if (!state.isActionInFlight) {
-      state.sessions = data.sessions || [];
+      let sessions = data.sessions || [];
+      if (state.user && state.user.role !== 'admin') {
+        sessions = sessions.filter((s) => !isSessionOver(s.session_date, s.start_hour));
+      }
+      state.sessions = sessions;
       renderSessionsGrid();
     }
   } catch (err) {
@@ -537,17 +548,21 @@ function renderSessionsGrid() {
   const grid = document.getElementById('sessions-grid');
   const emptyBox = document.getElementById('sessions-empty');
 
-  if (state.sessions.length === 0) {
+  const visibleSessions = (state.user && state.user.role === 'admin')
+    ? state.sessions
+    : state.sessions.filter((s) => !isSessionOver(s.session_date, s.start_hour));
+
+  if (visibleSessions.length === 0) {
     grid.innerHTML = '';
     emptyBox.style.display = 'block';
     document.getElementById('sessions-empty-text').textContent = state.selectedDate
-      ? `No sessions scheduled for ${state.selectedDate}.`
-      : 'No sessions are currently scheduled.';
+      ? `No upcoming sessions scheduled for ${state.selectedDate}.`
+      : 'No upcoming sessions are currently scheduled.';
     return;
   }
 
   emptyBox.style.display = 'none';
-  grid.innerHTML = state.sessions
+  grid.innerHTML = visibleSessions
     .map((session) => {
       const fillPercent = Math.min(100, Math.round((session.confirmed_count / session.capacity) * 100));
       const isCardFull = session.is_full;
@@ -662,6 +677,11 @@ function initSessionsFilter() {
   const dateInput = document.getElementById('filter-date');
   const btnClear = document.getElementById('btn-date-clear');
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (state.user && state.user.role !== 'admin') {
+    dateInput.min = todayStr;
+  }
+
   dateInput.addEventListener('change', (e) => {
     state.selectedDate = e.target.value;
     btnClear.style.display = state.selectedDate ? 'inline-block' : 'none';
@@ -710,8 +730,12 @@ async function loadMyBookings() {
       api('/waitlist/my')
     ]);
 
-    const bookings = bookingsData.bookings || [];
-    const waitlists = waitlistData.waitlist || [];
+    const allBookings = bookingsData.bookings || [];
+    const allWaitlists = waitlistData.waitlist || [];
+
+    // User screen requirement: hide any sessions whose date and time is over
+    const bookings = allBookings.filter((b) => !isSessionOver(b.session_date, b.start_hour));
+    const waitlists = allWaitlists.filter((w) => !isSessionOver(w.session_date, w.start_hour));
 
     if (bookings.length === 0) {
       emptyBox.style.display = 'block';
@@ -855,13 +879,45 @@ async function loadAdminSessions() {
       return;
     }
 
-    select.innerHTML = sessions
-      .map(
-        (s) =>
-          `<option value="${s.id}">${s.session_date} — ${formatHour(s.start_hour)} (${s.confirmed_count}/${s.capacity} Booked)</option>`
-      )
-      .join('');
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
+    const upcomingOrActive = [];
+    const pastSessions = [];
+
+    for (const s of sessions) {
+      if (isSessionOver(s.session_date, s.start_hour)) {
+        pastSessions.push(s);
+      } else {
+        upcomingOrActive.push(s);
+      }
+    }
+
+    let html = '';
+
+    if (upcomingOrActive.length > 0) {
+      html += `<optgroup label="Upcoming & Active Sessions">`;
+      html += upcomingOrActive
+        .map((s) => {
+          const isToday = s.session_date === todayStr;
+          const tag = isToday ? '[Today]' : '[Upcoming]';
+          return `<option value="${s.id}">${tag} ${s.session_date} — ${formatHour(s.start_hour)} (${s.confirmed_count}/${s.capacity} Booked)</option>`;
+        })
+        .join('');
+      html += `</optgroup>`;
+    }
+
+    if (pastSessions.length > 0) {
+      html += `<optgroup label="Past Sessions (Available up to 5 days old)">`;
+      html += pastSessions
+        .map((s) => {
+          return `<option value="${s.id}">[Past] ${s.session_date} — ${formatHour(s.start_hour)} (${s.confirmed_count}/${s.capacity} Booked)</option>`;
+        })
+        .join('');
+      html += `</optgroup>`;
+    }
+
+    select.innerHTML = html;
     loadAdminSessionBookings(select.value);
   } catch (err) {
     console.error('Failed to load admin sessions:', err);
@@ -965,6 +1021,9 @@ function setupAdminForms() {
   const createSuccess = document.getElementById('create-session-success');
   const createError = document.getElementById('create-session-error');
   const btnCreate = document.getElementById('btn-create-session');
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  inputDate.min = todayStr;
 
   formCreate.onsubmit = async (e) => {
     e.preventDefault();

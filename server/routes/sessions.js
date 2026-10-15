@@ -3,6 +3,11 @@
 
 const router = require('express').Router();
 const { requireAuth } = require('./auth');
+const {
+  isSessionStarted,
+  isSessionOver,
+  cleanupExpiredSessions
+} = require('../utils/sessionTime');
 
 function requireAdmin(req, res, next) {
   if (req.user.role !== 'admin') {
@@ -11,17 +16,15 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-function isSessionStarted(sessionDate, startHour) {
-  const sessionStart = new Date(`${sessionDate}T${String(startHour).padStart(2, '0')}:00:00`);
-  return new Date() >= sessionStart;
-}
-
 // GET /api/sessions?date=YYYY-MM-DD
 router.get('/', requireAuth, (req, res) => {
   const db = req.db;
   const { date } = req.query;
-  let rows;
 
+  // Purge any session records older than 5 days from website
+  cleanupExpiredSessions(db);
+
+  let rows;
   if (date) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({ error: 'date must be YYYY-MM-DD format' });
@@ -29,6 +32,15 @@ router.get('/', requireAuth, (req, res) => {
     rows = db.all('SELECT * FROM sessions WHERE session_date = ? ORDER BY start_hour', date);
   } else {
     rows = db.all('SELECT * FROM sessions ORDER BY session_date, start_hour');
+  }
+
+  // User screen requirement:
+  // When date and time of session is over, it is NOT visible on user screen.
+  // Admin screen requirement:
+  // Admin screen has up to 5 days old data available (and older than that deleted).
+  const isAdmin = req.user.role === 'admin';
+  if (!isAdmin) {
+    rows = rows.filter(session => !isSessionOver(session.session_date, session.start_hour));
   }
 
   const userId = req.user.id;
@@ -42,15 +54,17 @@ router.get('/', requireAuth, (req, res) => {
     const capacity       = Number(session.capacity) || 20;
     const seatsRemaining = Math.max(0, capacity - confirmedCount);
 
-    const userIsBooked = !!db.get(
+    const userIsBooked = !isAdmin && !!db.get(
       "SELECT id FROM bookings WHERE session_id = ? AND user_id = ? AND status = 'confirmed'",
       session.id, userId
     );
 
-    const userIsWaitlisted = !!db.get(
+    const userIsWaitlisted = !isAdmin && !!db.get(
       "SELECT id FROM waitlist WHERE session_id = ? AND user_id = ? AND status = 'waiting'",
       session.id, userId
     );
+
+    const over = isSessionOver(session.session_date, session.start_hour);
 
     return {
       id:                 Number(session.id),
@@ -61,6 +75,7 @@ router.get('/', requireAuth, (req, res) => {
       seats_remaining:    seatsRemaining,
       is_full:            seatsRemaining === 0,
       has_started:        isSessionStarted(session.session_date, session.start_hour),
+      is_over:            over,
       user_is_booked:     userIsBooked,
       user_is_waitlisted: userIsWaitlisted
     };
@@ -74,6 +89,8 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
   const db = req.db;
   const { session_date, start_hour } = req.body;
 
+  cleanupExpiredSessions(db);
+
   if (!session_date || !/^\d{4}-\d{2}-\d{2}$/.test(session_date)) {
     return res.status(400).json({ error: 'Valid session date is required (YYYY-MM-DD)' });
   }
@@ -81,6 +98,10 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
   const hour = Number(start_hour);
   if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
     return res.status(400).json({ error: 'Start hour must be an integer 0–23' });
+  }
+
+  if (isSessionOver(session_date, hour)) {
+    return res.status(400).json({ error: 'Cannot create a session for a date/time that has already ended.' });
   }
 
   const duplicate = db.get(
@@ -101,3 +122,4 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
 });
 
 module.exports = router;
+
